@@ -66,7 +66,7 @@ export const App: React.FC = () => {
 
   const allScreens: { id: Screen; label: string; num: string }[] = [
     { id: 'LANDING', label: '1. Landing Page', num: '01' },
-    { id: 'ROLE_SELECT', label: '2. Role Switcher', num: '02' },
+    { id: 'ROLE_SELECT', label: '2. Role Selection Login', num: '02' },
     { id: 'DASHBOARD', label: '3. RO / Admin Dashboard', num: '03' },
     { id: 'UPLOAD_PIPELINE', label: '4. Upload & AI Ingest', num: '04' },
     { id: 'DOC_VERIFICATION', label: '5. Doc Workspace (Split)', num: '05' },

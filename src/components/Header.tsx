@@ -16,7 +16,9 @@ import {
   Menu,
   X,
   Building2,
-  UserCheck
+  UserCheck,
+  LogIn,
+  User
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -52,6 +54,7 @@ export const Header: React.FC = () => {
 
   const navItems: { id: Screen; label: string; icon: React.ReactNode; roles?: UserRole[] }[] = [
     { id: 'LANDING', label: 'Home', icon: <Building2 className="w-4 h-4" /> },
+    { id: 'ROLE_SELECT', label: 'Role Login', icon: <LogIn className="w-4 h-4 text-emerald-600" /> },
     { id: 'DASHBOARD', label: 'Dashboard', icon: <Layers className="w-4 h-4" />, roles: ['ADMIN', 'REVENUE_OFFICER'] },
     { id: 'UPLOAD_PIPELINE', label: 'Upload & AI Ingest', icon: <FileText className="w-4 h-4" />, roles: ['DATA_ENTRY_OPERATOR', 'ADMIN', 'REVENUE_OFFICER'] },
     { id: 'DOC_VERIFICATION', label: 'Doc Workspace', icon: <FileText className="w-4 h-4" />, roles: ['DATA_ENTRY_OPERATOR', 'REVENUE_OFFICER', 'ADMIN'] },
@@ -121,8 +124,21 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Role Switcher & Persona selector */}
+          {/* Right Header Actions: Dedicated Login Button + Role Switcher */}
           <div className="hidden lg:flex items-center space-x-3">
+            {/* Dedicated Login Section Button */}
+            <button
+              onClick={() => setCurrentScreen('ROLE_SELECT')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition border ${
+                currentScreen === 'ROLE_SELECT'
+                  ? 'bg-blue-900 text-white border-blue-900 shadow-xs'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Login / अधिकारी लॉगिन</span>
+            </button>
+
             {/* Primary Role Selector */}
             <div className="relative">
               <button
@@ -190,6 +206,18 @@ export const Header: React.FC = () => {
                     </div>
                     {userRole === 'ADMIN' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
                   </button>
+
+                  <div className="p-2 border-t border-slate-100 bg-slate-50">
+                    <button
+                      onClick={() => {
+                        setRoleDropdownOpen(false);
+                        setCurrentScreen('ROLE_SELECT');
+                      }}
+                      className="w-full py-1.5 bg-blue-900 text-white rounded text-[11px] font-bold text-center hover:bg-blue-800"
+                    >
+                      Open Full Login Portal
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -231,6 +259,12 @@ export const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="flex lg:hidden items-center space-x-2">
+            <button
+              onClick={() => setCurrentScreen('ROLE_SELECT')}
+              className="px-2.5 py-1 text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md"
+            >
+              Login
+            </button>
             <button
               onClick={() => setIsNotifDrawerOpen(true)}
               className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
@@ -279,7 +313,7 @@ export const Header: React.FC = () => {
       {navMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2">
           <div className="py-2 border-b border-slate-100">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Select Role</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase">Login / Switch Role</span>
             <div className="grid grid-cols-2 gap-1.5 mt-1.5">
               {(['REVENUE_OFFICER', 'DATA_ENTRY_OPERATOR', 'CITIZEN', 'ADMIN'] as UserRole[]).map(r => (
                 <button
@@ -298,6 +332,15 @@ export const Header: React.FC = () => {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => {
+                setCurrentScreen('ROLE_SELECT');
+                setNavMenuOpen(false);
+              }}
+              className="mt-2 w-full py-1.5 bg-blue-900 text-white rounded text-xs font-bold text-center"
+            >
+              Open Full Role Login Portal
+            </button>
           </div>
           <div className="space-y-1">
             {navItems.map(item => (
@@ -321,4 +364,3 @@ export const Header: React.FC = () => {
     </header>
   );
 };
-

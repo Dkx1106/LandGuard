@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole, OfficerPersona } from '../types';
 import {
@@ -11,7 +11,13 @@ import {
   Lock,
   UserCheck,
   Stamp,
-  Scale
+  Scale,
+  LogIn,
+  KeyRound,
+  Building2,
+  Smartphone,
+  Fingerprint,
+  Sparkles
 } from 'lucide-react';
 
 export const RoleSelectScreen: React.FC = () => {
@@ -20,248 +26,520 @@ export const RoleSelectScreen: React.FC = () => {
     setUserRole,
     officerPersona,
     setOfficerPersona,
-    setCurrentScreen
+    setCurrentScreen,
+    addAuditLog
   } = useApp();
 
-  const handleSelectRole = (role: UserRole, targetScreen: any) => {
-    setUserRole(role);
-    setCurrentScreen(targetScreen);
+  const [activeTab, setActiveTab] = useState<UserRole>('REVENUE_OFFICER');
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
+
+  // Officer Form Inputs
+  const [officerId, setOfficerId] = useState('RO-UP-LKO-492');
+  const [officerPin, setOfficerPin] = useState('••••••');
+
+  // DEO Form Inputs
+  const [deoId, setDeoId] = useState('DEO-SAROJINI-409');
+  const [deoStation, setDeoStation] = useState('Tehsil Sarojini Nagar Center #2');
+
+  // Citizen Form Inputs
+  const [citizenMobile, setCitizenMobile] = useState('+91 98765 43210');
+  const [citizenOtp, setCitizenOtp] = useState('849201');
+
+  // Admin Form Inputs
+  const [adminId, setAdminId] = useState('ADMIN-NIC-UP-01');
+
+  const executeLogin = (role: UserRole, targetScreen: any, designation?: OfficerPersona) => {
+    setLoggingIn(true);
+    setLoginSuccessMessage(null);
+
+    setTimeout(() => {
+      setUserRole(role);
+      if (designation) {
+        setOfficerPersona(designation);
+      }
+
+      addAuditLog({
+        operatorName:
+          role === 'REVENUE_OFFICER'
+            ? `Rajeev Srivastava (${designation || officerPersona})`
+            : role === 'DATA_ENTRY_OPERATOR'
+            ? 'Sunil Sharma (DEO-409)'
+            : role === 'CITIZEN'
+            ? 'Rajesh Kumar (Citizen Buyer)'
+            : 'NIC Coordinator (State Admin)',
+        operatorRole: role,
+        action: `User Authenticated & Session Initialized`,
+        khasraNumber: '142/3',
+        details: `Authenticated via Jan Parichay / SSO token with ${role} permissions.`,
+        verificationBadge: 'SSO Authenticated'
+      });
+
+      setLoggingIn(false);
+      setLoginSuccessMessage(`Authentication successful! Redirecting to ${role.replace('_', ' ')} workspace...`);
+
+      setTimeout(() => {
+        setCurrentScreen(targetScreen);
+      }, 700);
+    }, 600);
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      {/* Title */}
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      {/* Gov-Tech Portal Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-900 text-xs px-3 py-1 rounded-full font-semibold">
-          <span>Role-Based Access Control (RBAC) Simulation</span>
+        <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-900 text-xs px-3 py-1 rounded-full font-bold">
+          <Lock className="w-3.5 h-3.5 text-blue-800" />
+          <span>National Single Sign-On (SSO) & Parichay Bridge</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-          Select Statutory Persona
+          LandSure AI — Role Selection Login Portal
         </h1>
         <p className="text-xs sm:text-sm text-slate-500">
-          LandSure AI provides dedicated interfaces tailored to statutory duties under the UP Revenue Code & Registration Act.
+          Sign in using your statutory government credentials, department employee token, or Citizen Mobile OTP to access appropriate authorization levels.
         </p>
       </div>
 
-      {/* Role Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Role 1: Revenue Officer */}
-        <div className={`rounded-2xl border p-6 transition-all ${
-          userRole === 'REVENUE_OFFICER'
-            ? 'border-blue-600 bg-white ring-2 ring-blue-500/20 shadow-md'
-            : 'border-slate-200 bg-white hover:border-slate-300'
-        }`}>
-          <div className="flex items-start justify-between">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center font-bold">
-              <Scale className="w-6 h-6" />
-            </div>
-            {userRole === 'REVENUE_OFFICER' && (
-              <span className="bg-blue-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Currently Active
-              </span>
-            )}
-          </div>
+      {/* Main Login Card with Role Selector Tabs */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+        {/* Top Role Selector Tabs */}
+        <div className="bg-slate-50 border-b border-slate-200 grid grid-cols-2 md:grid-cols-4 text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab('REVENUE_OFFICER')}
+            className={`py-3.5 px-4 text-center border-b-2 transition flex items-center justify-center gap-2 ${
+              activeTab === 'REVENUE_OFFICER'
+                ? 'border-blue-900 bg-white text-blue-900 font-bold'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Scale className="w-4 h-4 text-blue-900" />
+            <span>1. Revenue Officer</span>
+          </button>
 
-          <h3 className="font-extrabold text-lg text-slate-900 mt-4">
-            Revenue Officer (RO)
-          </h3>
-          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-            Statutory authority responsible for deed registration, mutation (Dakhil-Kharij), dispute adjudication, and ordering field demarcation.
-          </p>
+          <button
+            onClick={() => setActiveTab('DATA_ENTRY_OPERATOR')}
+            className={`py-3.5 px-4 text-center border-b-2 transition flex items-center justify-center gap-2 ${
+              activeTab === 'DATA_ENTRY_OPERATOR'
+                ? 'border-emerald-700 bg-white text-emerald-800 font-bold'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <FileCheck className="w-4 h-4 text-emerald-700" />
+            <span>2. Data Entry (DEO)</span>
+          </button>
 
-          {/* Contextual Persona Picker */}
-          <div className="mt-4 pt-3 border-t border-slate-100">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
-              Select Contextual Designation:
-            </span>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {[
-                { id: 'SUB_REGISTRAR', label: 'Sub-Registrar', desc: 'Deed Registration & Stamp Duty' },
-                { id: 'TEHSILDAR', label: 'Tehsildar', desc: 'Mutation & Summary Inquiries' },
-                { id: 'KANUNGO', label: 'Revenue Inspector', desc: 'Field Demarcation & RoR' }
-              ].map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setOfficerPersona(p.id as OfficerPersona)}
-                  className={`p-2 rounded-lg border text-left text-xs transition ${
-                    officerPersona === p.id
-                      ? 'bg-blue-50 border-blue-600 text-blue-900 font-semibold'
-                      : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="font-bold text-[11px]">{p.label}</div>
-                  <div className="text-[9px] text-slate-500 line-clamp-1">{p.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveTab('CITIZEN')}
+            className={`py-3.5 px-4 text-center border-b-2 transition flex items-center justify-center gap-2 ${
+              activeTab === 'CITIZEN'
+                ? 'border-amber-600 bg-white text-amber-900 font-bold'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Search className="w-4 h-4 text-amber-700" />
+            <span>3. Citizen / Buyer</span>
+          </button>
 
-          <div className="mt-5 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">Perms: Full Adjudication</span>
-            <button
-              onClick={() => handleSelectRole('REVENUE_OFFICER', 'DASHBOARD')}
-              className="inline-flex items-center space-x-1.5 bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition"
-            >
-              <span>Launch Officer Workspace</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('ADMIN')}
+            className={`py-3.5 px-4 text-center border-b-2 transition flex items-center justify-center gap-2 ${
+              activeTab === 'ADMIN'
+                ? 'border-slate-900 bg-white text-slate-900 font-bold'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Layers className="w-4 h-4 text-slate-800" />
+            <span>4. State Admin</span>
+          </button>
         </div>
 
-        {/* Role 2: Data Entry Operator */}
-        <div className={`rounded-2xl border p-6 transition-all ${
-          userRole === 'DATA_ENTRY_OPERATOR'
-            ? 'border-emerald-600 bg-white ring-2 ring-emerald-500/20 shadow-md'
-            : 'border-slate-200 bg-white hover:border-slate-300'
-        }`}>
-          <div className="flex items-start justify-between">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold">
-              <FileCheck className="w-6 h-6" />
+        {/* Tab Content Panels */}
+        <div className="p-6 sm:p-8">
+          {/* Feedback message banner if logging in */}
+          {loginSuccessMessage && (
+            <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+              <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span>{loginSuccessMessage}</span>
             </div>
-            {userRole === 'DATA_ENTRY_OPERATOR' && (
-              <span className="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Currently Active
-              </span>
-            )}
-          </div>
+          )}
 
-          <h3 className="font-extrabold text-lg text-slate-900 mt-4">
-            Data Entry Operator (DEO)
-          </h3>
-          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-            Tehsil Digitization Centre operator specializing in high-speed document ingestion, bilateral scanning filters, and bounding-box validation.
-          </p>
+          {/* TAB 1: REVENUE OFFICER LOGIN */}
+          {activeTab === 'REVENUE_OFFICER' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    Revenue Officer Adjudication Login
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    For Sub-Registrars, Tehsildars, and Kanungos adjudicating land title registrations and mutation.
+                  </p>
+                </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Bulk scanned deed & Jamabandi ingestion</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>OCR Bounding Box visual correction & OCR transcription</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Forward sanitized digital records to Revenue Officer queue</span>
-            </div>
-          </div>
+                {/* Designation / Persona Selector */}
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase">
+                    Select Contextual Designation:
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'SUB_REGISTRAR', label: 'Sub-Registrar', desc: 'Deed Registration' },
+                      { id: 'TEHSILDAR', label: 'Tehsildar', desc: 'Mutation (Dakhil-Kharij)' },
+                      { id: 'KANUNGO', label: 'Revenue Inspector', desc: 'Field Demarcation' }
+                    ].map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setOfficerPersona(p.id as OfficerPersona)}
+                        className={`p-2 rounded-lg border text-left text-xs transition ${
+                          officerPersona === p.id
+                            ? 'bg-blue-50 border-blue-900 text-blue-900 font-bold ring-1 ring-blue-500/20'
+                            : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="text-[11px]">{p.label}</div>
+                        <div className="text-[9px] text-slate-400">{p.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          <div className="mt-7 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">Perms: Ingest & Transcribe</span>
-            <button
-              onClick={() => handleSelectRole('DATA_ENTRY_OPERATOR', 'UPLOAD_PIPELINE')}
-              className="inline-flex items-center space-x-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg text-xs transition"
-            >
-              <span>Launch Ingestion Pipeline</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+                {/* Simulated Credentials Form */}
+                <div className="space-y-3 pt-2 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      Officer Service ID / e-Pramaan Code
+                    </label>
+                    <input
+                      type="text"
+                      value={officerId}
+                      onChange={(e) => setOfficerId(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      Security Token / Digital Signature PIN
+                    </label>
+                    <input
+                      type="password"
+                      value={officerPin}
+                      onChange={(e) => setOfficerPin(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg font-mono text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => executeLogin('REVENUE_OFFICER', 'DASHBOARD', officerPersona)}
+                    disabled={loggingIn}
+                    className="w-full inline-flex items-center justify-center space-x-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-3 px-4 rounded-lg shadow-sm transition"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>
+                      {loggingIn ? 'Authenticating with Parichay...' : `Sign In as Revenue Officer (${officerPersona.replace('_', ' ')})`}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: Info & Permissions Badge */}
+              <div className="lg:col-span-5 bg-blue-50/60 rounded-xl border border-blue-200 p-5 space-y-3 text-xs">
+                <div className="font-bold text-blue-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-blue-900" />
+                  <span>Officer Statutory Permissions</span>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-[11px]">
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-900 shrink-0 mt-0.5" />
+                    <span>Adjudicate Deed Verification Workspace & Anomaly Flags</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-900 shrink-0 mt-0.5" />
+                    <span>Run Multi-Registry Pre-Transaction Cross-Checks (e-Courts & CERSAI)</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-900 shrink-0 mt-0.5" />
+                    <span>Order Field Demarcation (Seemankan) under Section 24</span>
+                  </li>
+                </ul>
+                <div className="pt-2 border-t border-blue-200 text-[10px] text-blue-800 font-mono">
+                  Jurisdiction: Circle IV, Sarojini Nagar Tehsil, Lucknow
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: DATA ENTRY OPERATOR LOGIN */}
+          {activeTab === 'DATA_ENTRY_OPERATOR' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    Data Entry Operator (DEO) Ingestion Login
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Tehsil Digitization Center operator for batch deed scanning, bilateral filters, and OCR layout checks.
+                  </p>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      Operator Badge / Terminal ID
+                    </label>
+                    <input
+                      type="text"
+                      value={deoId}
+                      onChange={(e) => setDeoId(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-semibold text-slate-800 bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      Assigned Tehsil Scanning Center
+                    </label>
+                    <input
+                      type="text"
+                      value={deoStation}
+                      onChange={(e) => setDeoStation(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-800 bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => executeLogin('DATA_ENTRY_OPERATOR', 'UPLOAD_PIPELINE')}
+                    disabled={loggingIn}
+                    className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs py-3 px-4 rounded-lg shadow-sm transition"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>
+                      {loggingIn ? 'Authenticating Operator Session...' : 'Sign In as Data Entry Operator'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: DEO Scope */}
+              <div className="lg:col-span-5 bg-emerald-50/60 rounded-xl border border-emerald-200 p-5 space-y-3 text-xs">
+                <div className="font-bold text-emerald-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <FileCheck className="w-4 h-4 text-emerald-700" />
+                  <span>DEO Operational Scope</span>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-[11px]">
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                    <span>Upload 600 DPI Deeds, 7-12 extracts & RoR</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                    <span>Review Indic OCR Bounding Box boundaries & transcriptions</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                    <span>Forward sanitized records to Revenue Officer Adjudication Queue</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: CITIZEN LOGIN */}
+          {activeTab === 'CITIZEN' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    Citizen / Land Buyer Verification Portal
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Verify land title authenticity, check bank encumbrances, and generate official Land Health Certificates.
+                  </p>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      Citizen Mobile Number (Aadhaar Linked)
+                    </label>
+                    <div className="relative">
+                      <Smartphone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                      <input
+                        type="text"
+                        value={citizenMobile}
+                        onChange={(e) => setCitizenMobile(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg font-mono font-semibold text-slate-800 bg-slate-50 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      6-Digit Mobile Verification OTP (Demo Pre-filled)
+                    </label>
+                    <input
+                      type="text"
+                      value={citizenOtp}
+                      onChange={(e) => setCitizenOtp(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-bold tracking-widest text-slate-800 bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => executeLogin('CITIZEN', 'CITIZEN_PORTAL')}
+                    disabled={loggingIn}
+                    className="w-full inline-flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-3 px-4 rounded-lg shadow-sm transition"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>
+                      {loggingIn ? 'Verifying OTP...' : 'Sign In as Citizen Buyer'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: Citizen Benefits */}
+              <div className="lg:col-span-5 bg-amber-50/60 rounded-xl border border-amber-200 p-5 space-y-3 text-xs">
+                <div className="font-bold text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <Search className="w-4 h-4 text-amber-700" />
+                  <span>Citizen Protection Features</span>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-[11px]">
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                    <span>"Verify Before You Buy" public title clearance search</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                    <span>Downloadable Official Land Health Certificate with QR seal</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                    <span>Instant warnings for active bank mortgages & pending court stays</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: STATE ADMIN LOGIN */}
+          {activeTab === 'ADMIN' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    State Registry Administrator Login
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    For State Directorate of Land Records & National Informatics Centre (NIC) coordinators.
+                  </p>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                      NIC Administrative Token
+                    </label>
+                    <input
+                      type="text"
+                      value={adminId}
+                      onChange={(e) => setAdminId(e.target.value)}
+                      className="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-semibold text-slate-800 bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => executeLogin('ADMIN', 'DASHBOARD')}
+                    disabled={loggingIn}
+                    className="w-full inline-flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-lg shadow-sm transition"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>
+                      {loggingIn ? 'Validating Root Privileges...' : 'Sign In as System Administrator'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right: Admin Features */}
+              <div className="lg:col-span-5 bg-slate-100 rounded-xl border border-slate-200 p-5 space-y-3 text-xs">
+                <div className="font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-slate-800" />
+                  <span>Administrative Oversight</span>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-[11px]">
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-slate-800 shrink-0 mt-0.5" />
+                    <span>District-wise discrepancy index across all 75 UP Districts</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-slate-800 shrink-0 mt-0.5" />
+                    <span>Tamper-evident SHA-256 cryptographic audit logs inspection</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-slate-800 shrink-0 mt-0.5" />
+                    <span>Indic ML model telemetry & layout analysis drift monitoring</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Role 3: Citizen / Buyer */}
-        <div className={`rounded-2xl border p-6 transition-all ${
-          userRole === 'CITIZEN'
-            ? 'border-amber-600 bg-white ring-2 ring-amber-500/20 shadow-md'
-            : 'border-slate-200 bg-white hover:border-slate-300'
-        }`}>
-          <div className="flex items-start justify-between">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-900 flex items-center justify-center font-bold">
-              <Search className="w-6 h-6" />
-            </div>
-            {userRole === 'CITIZEN' && (
-              <span className="bg-amber-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Currently Active
+        {/* Quick Demo 1-Click Login Bar for SIH 2026 Judges */}
+        <div className="bg-slate-100/90 border-t border-slate-200 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <span className="font-bold text-slate-800">
+                Hackathon Presentation Fast-Logins (1-Click Switch):
               </span>
-            )}
-          </div>
-
-          <h3 className="font-extrabold text-lg text-slate-900 mt-4">
-            Citizen / Prospective Land Buyer
-          </h3>
-          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-            Public transparent portal enabling citizens, farmers, and investors to verify land parcels before handing over financial advances.
-          </p>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Instant Khasra title search by District/Tehsil/Village</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Official "Land Health Certificate" generation with QR seal</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Plain-language warnings for active bank mortgages & stays</span>
-            </div>
-          </div>
 
-          <div className="mt-7 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">Perms: Public Search & Print</span>
-            <button
-              onClick={() => handleSelectRole('CITIZEN', 'CITIZEN_PORTAL')}
-              className="inline-flex items-center space-x-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition"
-            >
-              <span>Open Citizen Portal</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Role 4: System Administrator */}
-        <div className={`rounded-2xl border p-6 transition-all ${
-          userRole === 'ADMIN'
-            ? 'border-slate-800 bg-white ring-2 ring-slate-800/20 shadow-md'
-            : 'border-slate-200 bg-white hover:border-slate-300'
-        }`}>
-          <div className="flex items-start justify-between">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center font-bold">
-              <Layers className="w-6 h-6" />
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => executeLogin('REVENUE_OFFICER', 'DASHBOARD', 'SUB_REGISTRAR')}
+                className="bg-white hover:bg-blue-50 border border-slate-300 text-blue-950 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition shadow-2xs"
+              >
+                RO (Sub-Registrar)
+              </button>
+              <button
+                onClick={() => executeLogin('REVENUE_OFFICER', 'DASHBOARD', 'TEHSILDAR')}
+                className="bg-white hover:bg-blue-50 border border-slate-300 text-blue-950 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition shadow-2xs"
+              >
+                RO (Tehsildar)
+              </button>
+              <button
+                onClick={() => executeLogin('DATA_ENTRY_OPERATOR', 'UPLOAD_PIPELINE')}
+                className="bg-white hover:bg-emerald-50 border border-slate-300 text-emerald-950 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition shadow-2xs"
+              >
+                Operator (DEO)
+              </button>
+              <button
+                onClick={() => executeLogin('CITIZEN', 'CITIZEN_PORTAL')}
+                className="bg-white hover:bg-amber-50 border border-slate-300 text-amber-950 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition shadow-2xs"
+              >
+                Citizen Buyer
+              </button>
+              <button
+                onClick={() => executeLogin('ADMIN', 'DASHBOARD')}
+                className="bg-white hover:bg-slate-200 border border-slate-300 text-slate-900 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition shadow-2xs"
+              >
+                Super Admin
+              </button>
             </div>
-            {userRole === 'ADMIN' && (
-              <span className="bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Currently Active
-              </span>
-            )}
-          </div>
-
-          <h3 className="font-extrabold text-lg text-slate-900 mt-4">
-            System Administrator / NIC Coordinator
-          </h3>
-          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-            Oversees state-wide digitisation throughput, model drift telemetry, API bridge health, and immutable audit logs.
-          </p>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-slate-700 shrink-0" />
-              <span>District-wise discrepancy indexing and anomaly heatmaps</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-slate-700 shrink-0" />
-              <span>Cryptographic SHA-256 tamper-evident event ledger</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-3.5 h-3.5 text-slate-700 shrink-0" />
-              <span>System telemetry & ML pipeline confidence monitoring</span>
-            </div>
-          </div>
-
-          <div className="mt-7 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">Perms: System Config & Audit</span>
-            <button
-              onClick={() => handleSelectRole('ADMIN', 'DASHBOARD')}
-              className="inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition"
-            >
-              <span>Access Admin Console</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
       </div>
     </div>
   );
 };
-

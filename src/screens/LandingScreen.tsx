@@ -71,9 +71,9 @@ export const LandingScreen: React.FC = () => {
 
                 <button
                   onClick={() => setCurrentScreen('ROLE_SELECT')}
-                  className="inline-flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-4 py-3 rounded-lg transition text-sm border border-slate-700"
+                  className="inline-flex items-center space-x-2 bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded-lg transition text-sm border border-blue-700 shadow-md"
                 >
-                  <span>Select Role / Persona</span>
+                  <span>Role Selection Login / अधिकारी लॉगिन</span>
                 </button>
               </div>
 
@@ -190,7 +190,7 @@ export const LandingScreen: React.FC = () => {
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-900">
-              <span>Enter Workspace</span>
+              <span>Login as Revenue Officer</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </div>
           </div>
@@ -199,7 +199,7 @@ export const LandingScreen: React.FC = () => {
           <div
             onClick={() => {
               setUserRole('DATA_ENTRY_OPERATOR');
-              setCurrentScreen('UPLOAD_PIPELINE');
+              setCurrentScreen('ROLE_SELECT');
             }}
             className="group bg-white p-5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition cursor-pointer flex flex-col justify-between"
           >
@@ -213,7 +213,7 @@ export const LandingScreen: React.FC = () => {
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-800">
-              <span>Start Ingestion</span>
+              <span>Login as DEO Operator</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </div>
           </div>
@@ -222,7 +222,7 @@ export const LandingScreen: React.FC = () => {
           <div
             onClick={() => {
               setUserRole('CITIZEN');
-              setCurrentScreen('CITIZEN_PORTAL');
+              setCurrentScreen('ROLE_SELECT');
             }}
             className="group bg-white p-5 rounded-xl border border-slate-200 hover:border-amber-500 hover:shadow-md transition cursor-pointer flex flex-col justify-between"
           >
@@ -236,7 +236,7 @@ export const LandingScreen: React.FC = () => {
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-900">
-              <span>Verify Land Title</span>
+              <span>Login / Verify as Citizen</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </div>
           </div>
@@ -245,7 +245,7 @@ export const LandingScreen: React.FC = () => {
           <div
             onClick={() => {
               setUserRole('ADMIN');
-              setCurrentScreen('DASHBOARD');
+              setCurrentScreen('ROLE_SELECT');
             }}
             className="group bg-white p-5 rounded-xl border border-slate-200 hover:border-slate-800 hover:shadow-md transition cursor-pointer flex flex-col justify-between"
           >
@@ -259,7 +259,7 @@ export const LandingScreen: React.FC = () => {
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-800">
-              <span>Admin Console</span>
+              <span>Login as State Admin</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </div>
           </div>
